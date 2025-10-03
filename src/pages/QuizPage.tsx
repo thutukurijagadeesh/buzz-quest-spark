@@ -24,6 +24,9 @@ const QuizPage = () => {
   const currentQuestion = questions[currentQuestionIndex];
 
   useEffect(() => {
+    // Only run timer if we have questions
+    if (questions.length === 0) return;
+    
     if (timeLeft === 0) {
       handleNextQuestion();
     }
@@ -31,7 +34,7 @@ const QuizPage = () => {
       setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
     }, 1000);
     return () => clearInterval(timer);
-  }, [timeLeft]);
+  }, [timeLeft, questions.length]);
 
   const handleAnswerSelect = (answerIndex: number) => {
     if (showExplanation) return;
@@ -63,8 +66,31 @@ const QuizPage = () => {
     }
   };
 
-  if (!subject || !difficulty || !currentQuestion) {
-    return <div>Loading...</div>;
+  if (!subject || !difficulty) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+
+  if (questions.length === 0) {
+    return (
+      <div className="min-h-screen bg-background px-4 py-8">
+        <div className="mx-auto max-w-2xl text-center">
+          <Card className="p-8">
+            <h2 className="text-2xl font-bold mb-4">No Questions Available</h2>
+            <p className="text-muted-foreground mb-6">
+              Questions for {subject.name} - {difficulty.name} are coming soon!
+            </p>
+            <Button onClick={() => navigate(`/difficulty/${subjectId}`)}>
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Choose Another Level
+            </Button>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  if (!currentQuestion) {
+    return <div className="min-h-screen flex items-center justify-center">Loading question...</div>;
   }
 
   const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
